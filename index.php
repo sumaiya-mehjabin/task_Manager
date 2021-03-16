@@ -14,14 +14,14 @@
 <div class="container">
     <div class="offset-4 col-md-4">
         <div class="form-container">
-            <form action="">
+            <form action="./system/auth/login.php" method="post">
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" class="form-control" placeholder="Email Address">
+                    <input type="email" class="form-control" placeholder="Email Address" name="email" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" class="form-control" placeholder="Password">
+                    <input type="password" class="form-control" placeholder="Password" name="password" required>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary">LOGIN</button>
