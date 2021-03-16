@@ -14,8 +14,16 @@
 <div class="container">
     <div class="offset-4 col-md-4">
         <div class="form-container">
-            <form action="">
-                <div class="form-group">
+            <div action="">
+                <div class="form-group"
+                     <label>Name</label>
+                <input type="name" class="form-control" placeholder="Name">
+                </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="number" class="form-control" placeholder="Phone Number">
+            </div>
+            <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" class="form-control" placeholder="Email Address">
                 </div>
@@ -24,15 +32,18 @@
                     <input type="password" class="form-control" placeholder="Password">
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-primary">LOGIN</button>
+                    <button class="btn btn-primary">Register</button>
                 </div>
-                <div class="form-group">
-                    <a href="./register.php">New here? Register Now</a>
-                </div>
+            <div class="form-group">
+                <a href="./index.php">Already have an account? Login Now</a>
+            </div>
             </form>
         </div>
     </div>
 </div>
+
+</body>
+</html>
 
 </body>
 </html>
