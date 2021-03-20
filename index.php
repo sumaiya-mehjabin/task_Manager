@@ -44,7 +44,7 @@
                             <?php foreach ($projects as $key => $value) { ?>
                                 <tr>
                                     <td>
-                                        <a href="pages/project_details.php?id=<?php echo $value['id'] ?>">
+                                        <a href="project_details.php?id=<?php echo $value['id'] ?>">
                                             <?php echo $value['title'] ?>
                                         </a>
                                     </td>

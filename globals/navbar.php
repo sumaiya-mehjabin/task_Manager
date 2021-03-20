@@ -1,7 +1,7 @@
 <?php include 'globals/core.php'?>
 <nav class="navbar navbar-expand-lg navbar-light main-nav-bar">
     <div class="container">
-        <a class="navbar-brand" href="#">TASK MANAGER</a>
+        <a class="navbar-brand" href="<?php echo $APP_URL?>">TASK MANAGER</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
