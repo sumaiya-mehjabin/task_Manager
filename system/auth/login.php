@@ -1,7 +1,7 @@
 <?php
 
 
-
+$APP_URL = 'http://localhost/task_Manager';
 $DB_servername = "localhost";
 $DB_username = "root";
 $DB_password = "";
@@ -26,12 +26,12 @@ if ($conn->connect_error) {
 }
 
 
-$sql = "SELECT * FROM `users` WHERE username='$email'and password='".md5($password)."'";
+$sql = "SELECT * FROM `users` WHERE email='$email'and password='".$password."'";
 $result = mysqli_query($conn,$sql) or die(mysql_error());
 $rows = mysqli_num_rows($result);
 
 if ($rows == 1) {
-    echo "login successful";
+    header('Location: '.$APP_URL.'/dashboard.php');
 } else {
     echo "Invalid";
 }

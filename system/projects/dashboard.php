@@ -7,25 +7,15 @@ $DB_username = "root";
 $DB_password = "";
 $DB_name = "task_manager";
 
-$name = $_POST['name'];
-$phone = $_POST['phone'];
-$email = $_POST['email'];
-$password = md5($_POST['password']);
+$project = $_POST['project_title'];
+$description = $_POST['description'];
 
-if($name == ''){
-    echo 'Name is required';
+if($project == ''){
+    echo 'Project Name is required';
     exit();
 }
-if($phone == ''){
-    echo 'Name is required';
-    exit();
-}
-if($email == ''){
-    echo 'Email is required';
-    exit();
-}
-if($password == ''){
-    echo 'Password is required';
+if($description == ''){
+    echo 'Project description is required';
     exit();
 }
 // Create connection
@@ -35,11 +25,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
-$sql = "INSERT INTO users (name, phone, email, password) VALUES ('$name', '$phone', '$email', '$password')";
+$date = date("Y/m/d");
+$sql = "INSERT INTO projects (title, description, created_at) VALUES ('$project', '$description', '$date')";
 
 if ($conn->query($sql) === TRUE) {
-    header('Location: '.$APP_URL.'/index.php');
+    header('Location: '.$APP_URL.'/dashboard.php');
 }
 else {
     echo "Error: " . $sql . "<br>" . $conn->error;
