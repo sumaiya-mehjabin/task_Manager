@@ -1,38 +1,54 @@
 <?php
+include 'globals/core.php';
+$projects = [];
+
+$project_title = '';
+$description = '';
 
 
-$APP_URL = 'http://localhost/task_Manager';
-$DB_servername = "localhost";
-$DB_username = "root";
-$DB_password = "";
-$DB_name = "task_manager";
+$error = array(
+    "title" => '',
+    "description" => '',
+);
+$error_count = 0;
 
-$project = $_POST['project_title'];
-$description = $_POST['description'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $project_title = $_POST['project_title'];
+    $description = $_POST['description'];
 
-if($project == ''){
-    echo 'Project Name is required';
-    exit();
+
+    if($project_title == ''){
+        $error['title'] = "Title field is required";
+        $error_count++;
+    }
+    if($description == ''){
+        $error['description'] = "Description field is required";
+        $error_count++;
+    }
+
+    $date = date("Y/m/d");
+
+    $sql = "INSERT INTO projects (title, description, created_at) VALUES ('$project_title', '$description', '$date')";
+
+    if ($conn->query($sql) === TRUE) {
+        header('Location: '.$APP_URL.'/index.php');
+    }
+    else {
+        $error['name'] = "something went wrong";
+        $error_count++;
+    }
+    $conn->close();
 }
-if($description == ''){
-    echo 'Project description is required';
-    exit();
-}
-// Create connection
-$conn = new mysqli($DB_servername, $DB_username, $DB_password, $DB_name);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $sql = "SELECT * FROM projects";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        // output data of each row
+        while($row = $result->fetch_assoc()) {
+            $projects[] = $row;
+        }
+    }
+    $conn->close();
 }
 
-$date = date("Y/m/d");
-$sql = "INSERT INTO projects (title, description, created_at) VALUES ('$project', '$description', '$date')";
-
-if ($conn->query($sql) === TRUE) {
-    header('Location: '.$APP_URL.'/dashboard.php');
-}
-else {
-    echo "Error: " . $sql . "<br>" . $conn->error;
-}
-
-$conn->close();

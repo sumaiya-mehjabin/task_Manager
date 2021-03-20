@@ -1,39 +1,49 @@
 <?php
+include 'globals/core.php';
+$error = array(
+    "email" => '',
+    "password" => '',
+);
+$error_count = 0;
+$email = '';
+$password = '';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-$APP_URL = 'http://localhost/task_Manager';
-$DB_servername = "localhost";
-$DB_username = "root";
-$DB_password = "";
-$DB_name = "task_manager";
+    if($email == ''){
+        $error['email'] = "Email field is required";
+        $error_count++;
+    }
+    if($password == ''){
+        $error['password'] = "Password field is required";
+        $error_count++;
+    }
+    if($error_count > 0){return;}
+    $bash_password = md5($password);
+    $sql = "SELECT * FROM `users` WHERE email='$email'and password='".$bash_password."'";
+    $result = mysqli_query($conn,$sql) or die(mysql_error());
+    $rows = mysqli_num_rows($result);
 
-$email = $_POST['email'];
-$password = md5($_POST['password']);
-
-if($email == ''){
-    echo 'Email is required';
-    exit();
+    if ($rows == 1) {
+        $user_sql = "SELECT * FROM users WHERE email=".$email;
+        $result = $conn->query($sql);
+        $User = $result->fetch_assoc();
+        session_start();
+        $_SESSION["id"] = $User['id'];
+        $_SESSION["name"] = $User['name'];
+        $_SESSION["email"] = $User['email'];
+        $_SESSION["avatar"] = $User['avatar'];
+        $_SESSION["phone"] = $User['phone'];
+        $_SESSION["password"] = $User['password'];
+        $_SESSION["is_logged_in"] = true;
+        header('Location: '.$APP_URL.'/index.php');
+    } else {
+        $error['email'] = "invalid credential";
+        $error_count++;
+    }
+    $conn->close();
 }
-if($password == ''){
-    echo 'Password is required';
-    exit();
-}
-// Create connection
-$conn = new mysqli($DB_servername, $DB_username, $DB_password, $DB_name);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
-
-$sql = "SELECT * FROM `users` WHERE email='$email'and password='".$password."'";
-$result = mysqli_query($conn,$sql) or die(mysql_error());
-$rows = mysqli_num_rows($result);
-
-if ($rows == 1) {
-    header('Location: '.$APP_URL.'/dashboard.php');
-} else {
-    echo "Invalid";
-}
-$conn->close();
 

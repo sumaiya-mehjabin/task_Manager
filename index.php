@@ -1,38 +1,66 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha512-k78e1fbYs09TQTqG79SpJdV4yXq8dX6ocfP0bzQHReQSbEghnS6AQHE2BbZKns962YaqgQL16l7PkiiAHZYvXQ==" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha512-ANkGm5vSmtDaoFA/NB1nVJzOKOiI4a/9GipFtkpMG8Rg2Bz8R1GFf5kfL0+z0lcv2X/KZRugwrAlVTAgmxgvIg==" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="./resources/style/style.css">
-    <title>Document</title>
-</head>
+<?php include './system/authCheck.php' ?>
+<?php include 'globals/header.php' ?>
+<?php include './system/projects/dashboard.php' ?>
 <body>
-
-<div class="container">
-    <div class="offset-4 col-md-4">
-        <div class="form-container">
-            <form action="./system/auth/login.php" method="post">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" class="form-control" placeholder="Email Address" name="email" required>
+<div class="main-body-wrapper">
+    <header>
+        <?php include 'globals/navbar.php' ?>
+    </header>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="form-container margin-100">
+                        <div class="form-title text-left">CREATE PROJECT</div>
+                        <form action="" method="post">
+                            <div class="form-group">
+                                <label>Project Title</label>
+                                <input type="name" class="form-control" placeholder="Project Title" name="project_title"
+                                       required>
+                                <div class="invalid-feedback"><?php if ($error['email'] != '') echo $error['email']; ?></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" name="description" rows="5" name="description"
+                                          required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-primary">Create Project</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-control" placeholder="Password" name="password" required>
+                <div class="col-md-7">
+                    <div class="table-wrapper margin-100">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Project Title</th>
+                                <th>Description</th>
+                                <th>Created_at</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($projects as $key => $value) { ?>
+                                <tr>
+                                    <td>
+                                        <a href="pages/project_details.php?id=<?php echo $value['id'] ?>">
+                                            <?php echo $value['title'] ?>
+                                        </a>
+                                    </td>
+                                    <td><?php echo $value['description'] ?></td>
+                                    <td><?php echo $value['created_at'] ?></td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <button class="btn btn-primary">LOGIN</button>
-                </div>
-                <div class="form-group">
-                    <a href="./register.php">New here? Register Now</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </main>
 </div>
 
+</div>
 </body>
 </html>
