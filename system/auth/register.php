@@ -5,6 +5,7 @@ $error = array(
     "phone" => '',
     "email" => '',
     "password" => '',
+    "confirm_password" => '',
 );
 $error_count = 0;
 
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = "INSERT INTO users (name, phone, email, password) VALUES ('$name', '$phone', '$email', '$bash_password')";
     if ($conn->query($sql) === TRUE) {
-        header('Location: '.$APP_URL.'/pages/auth/login.php');
+        header('Location: '.$APP_URL.'/login.php');
     }
     else {
         $error['name'] = "something went wrong";
