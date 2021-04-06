@@ -59,7 +59,7 @@ $APP_URL = 'http://localhost/task_Manager';
                         <input type="hidden" name="project_id" value="<?php echo $project_id ?>">
                         <div class="form-group">
                             <label>Task Title</label>
-                            <input type="text" class="form-control" placeholder="Project Title" name="task_title"
+                            <input type="text" class="form-control" placeholder="Task Title" name="task_title"
                                    required>
                             <div class="invalid-feedback"></div>
                         </div>

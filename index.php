@@ -371,9 +371,9 @@ $APP_URL = 'http://localhost/task_Manager';
             success: function (data) {
                 let response = JSON.parse(data);
                 if (response.status == 2000) {
+                    GetProjects();
                     $('#EditProject').modal('hide');
                     $('#EditProject')[0].reset();
-                    GetProjects();
                 }
             }
         });
