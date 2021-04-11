@@ -2,7 +2,7 @@
 $APP_URL = 'https://demo1.redishketch.com';
 $DB_servername = "localhost";
 $DB_username = "root";
-$DB_password = "";
+$DB_password = "n1R4YDCHlAyx7OqJn1R4YDCHlAyx7OqJ";
 $DB_name = "task_manager";
 
 // Create connection
