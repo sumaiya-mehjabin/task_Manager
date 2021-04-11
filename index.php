@@ -1,7 +1,7 @@
 <?php include './system/authCheck.php' ?>
 <?php include 'globals/header.php' ?>
 <?php
-$APP_URL = 'http://localhost/task_Manager';
+$APP_URL = 'https://demo1.redishketch.com';
 ?>
 <body>
 <div class="main-body-wrapper">

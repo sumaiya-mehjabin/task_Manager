@@ -1,3 +1,3 @@
 <?php
 
-$APP_URL = 'http://localhost/task_Manager';
+$APP_URL = 'https://demo1.redishketch.com';

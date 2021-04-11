@@ -1,5 +1,5 @@
 <?php
-$APP_URL = 'http://localhost/task_Manager';
+$APP_URL = 'https://demo1.redishketch.com';
 $DB_servername = "localhost";
 $DB_username = "root";
 $DB_password = "";
