@@ -26,7 +26,11 @@ $APP_URL = 'http://localhost/task_Manager';
                                 <tr>
                                     <th>Project Title</th>
                                     <th>Description</th>
-                                    <th>Created_at</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th width="20px">Total Tasks</th>
+                                    <th width="20px">On Progress Tasks</th>
+                                    <th width="20px">Completed Tasks</th>
                                     <th class="text-center">Options</th>
                                 </tr>
                                 </thead>
@@ -43,7 +47,11 @@ $APP_URL = 'http://localhost/task_Manager';
                                 <tr>
                                     <th>Project Title</th>
                                     <th>Description</th>
-                                    <th>Created_at</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th width="20px">Total Tasks</th>
+                                    <th width="20px">On Progress Tasks</th>
+                                    <th width="20px">Completed Tasks</th>
                                     <th class="text-center">Options</th>
                                 </tr>
                                 </thead>
@@ -77,6 +85,22 @@ $APP_URL = 'http://localhost/task_Manager';
                             <label>Description</label>
                             <textarea class="form-control" name="description" rows="5" name="description"
                                       required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="text" id="project_start_date" class="form-control" placeholder="Project Start Date"
+                                   name="project_start_date" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="text" id="project_end_date" class="form-control" placeholder="Project End Date"
+                                   name="project_end_date" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Choose Members</label>
+                            <select id="Create_select2" class="form-control select2-multi w-100" name="users[]" multiple="multiple" required></select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -130,6 +154,18 @@ $APP_URL = 'http://localhost/task_Manager';
                             <label>Description</label>
                             <textarea class="form-control  project-desc" name="description" rows="5" name="description"
                                       required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="text" id="project_edit_start_date" class="form-control" placeholder="Project Start Date"
+                                   name="project_start_date" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="text" id="project_edit_end_date" class="form-control" placeholder="Project End Date"
+                                   name="project_end_date" required>
+                            <div class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -207,16 +243,30 @@ $APP_URL = 'http://localhost/task_Manager';
 <script>
     let Selected_project = 0;
     $(function () {
+        GetUsers()
         GetProjects()
         GetProjectsOther()
+        $('#project_start_date').flatpickr({
+            enableTime: true,
+            altInput: true,
+            altFormat: "d M, Y h:i K",
+            dateFormat: "Y-m-d H:i:s",
+            defaultDate: new Date(),
+        });
+        $('#project_end_date').flatpickr({
+            enableTime: true,
+            altInput: true,
+            altFormat: "d M, Y h:i K",
+            dateFormat: "Y-m-d H:i:s",
+            defaultDate: new Date(),
+        });
         $('#ProjectMembers').on('hidden.bs.modal', function () {
             $('.invalid-feedback').html('');
             $('#_add_member_email_').val('')
         })
         $('#EditProject').on('hidden.bs.modal', function () {
-            $('#EditProject')[0].reset();
+            $('#EditForm')[0].reset();
         })
-
     });
 
     function CreateProject(event) {
@@ -253,6 +303,33 @@ $APP_URL = 'http://localhost/task_Manager';
         });
     }
 
+    function GetUsers() {
+        $.ajax({
+            url: "<?php echo $APP_URL?>/system/projects/dashboard.php",
+            cache: false,
+            type: "GET",
+            headers: {route: 'GET_ALL_USERS'},
+            success: function (data) {
+                let response = JSON.parse(data);
+                if (response.status = 2000) {
+                    renderSelect2(response.data)
+                }
+            }
+        });
+    }
+
+    function renderSelect2(users) {
+        let options = '';
+        $.each(users, function (i, v) {
+            let row = `<option value="`+v.id+`">`+v.name+`</option>`
+            options = options + row;
+        })
+        $('#Create_select2').html(options);
+        setTimeout(function (){
+            $('.select2-multi').select2();
+        },300)
+    }
+
     function GetProjectsOther() {
         $.ajax({
             url: "<?php echo $APP_URL?>/system/projects/dashboard.php",
@@ -286,16 +363,32 @@ $APP_URL = 'http://localhost/task_Manager';
     }
 
     function renderTable(projects) {
-        let table = '';
-        $.each(projects, function (i, v) {
-            let row = `<tr>
+        if(projects.length > 0){
+            let table = '';
+            $.each(projects, function (i, v) {
+                let row = `<tr>
                                 <td>
                                     <a href="#">` + v.title + `</a>
                                 </td>
                                 <td>
                                     <div class="cut-text">` + v.description + `</div>
                                 </td>
-                                <td>` + v.created_at + `</td>
+                                <td>
+                                    <div>` + v.start_date_formatted + `</div>
+                                </td>
+                                <td>
+                                    <div>` + v.end_date_formatted + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks_progress + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks_done + `</div>
+                                </td>
+
                                 <td class="text-center">
                                     <a href="project_details.php?project_id=`+v.projects_id+`" type="button" class="btn btn-sm btn-info" data-toggle="tooltip" data-placement="top" title="Project Tasks"><i class="fa fa-tasks"></i></a>
                                     <button onclick="ShowMemberModal(` + v.projects_id + `)" type="button" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Project Members"><i class="fa fa-users"></i></button>
@@ -303,35 +396,62 @@ $APP_URL = 'http://localhost/task_Manager';
                                     <button onclick="RemoveItemModal(` + v.projects_id + `)" type="button" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="top" title="Remove Project"><i class="fa fa-trash"></i></button>
                                 </td>
                             </tr>`
-            table = table + row;
-        })
-        $('#list-table').html(table);
-        setTimeout(function (){
-            $('[data-toggle="tooltip"]').tooltip()
-        },100)
+                table = table + row;
+            })
+            $('#list-table').html(table);
+            setTimeout(function (){
+                $('[data-toggle="tooltip"]').tooltip()
+            },100)
+        }else{
+            let error = `
+                <tr><td colspan="8"><div class="alert alert-info text-center" role="alert">List is empty</div></td></tr>
+            `
+            $('#list-table').html(error);
+        }
     }
 
     function renderTableOthers(projects) {
-        let table = '';
-        $.each(projects, function (i, v) {
-            let row = `<tr>
+        if(projects.length > 0) {
+            let table = '';
+            $.each(projects, function (i, v) {
+                let row = `<tr>
                                 <td>
                                     <a href="#">` + v.title + `</a>
                                 </td>
                                 <td>
                                     <div class="cut-text">` + v.description + `</div>
                                 </td>
-                                <td>` + v.created_at + `</td>
+                                <td>
+                                    <div>` + v.start_date_formatted + `</div>
+                                </td>
+                                <td>
+                                    <div>` + v.end_date_formatted + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks_progress + `</div>
+                                </td>
+                                <td width="20px">
+                                    <div>` + v.tasks_done + `</div>
+                                </td>
                                 <td class="text-center">
-                                    <a href="project_details.php?project_id=`+v.projects_id+`" type="button" class="btn btn-sm btn-info" data-toggle="tooltip" data-placement="top" title="Project Tasks"><i class="fa fa-tasks"></i></a>
+                                    <a href="project_details.php?project_id=` + v.projects_id + `" type="button" class="btn btn-sm btn-info" data-toggle="tooltip" data-placement="top" title="Project Tasks"><i class="fa fa-tasks"></i></a>
                                 </td>
                             </tr>`
-            table = table + row;
-        })
-        $('#list-table-other').html(table);
-        setTimeout(function (){
-            $('[data-toggle="tooltip"]').tooltip()
-        })
+                table = table + row;
+            })
+            $('#list-table-other').html(table);
+            setTimeout(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+        } else{
+            let error = `
+                <tr><td colspan="8"><div class="alert alert-info text-center" role="alert">List is empty</div></td></tr>
+            `
+            $('#list-table-other').html(error);
+        }
     }
 
     function RemoveItemModal(project_id) {
@@ -354,6 +474,23 @@ $APP_URL = 'http://localhost/task_Manager';
                     $('#EditProject').find('.remove-modal-item').val(response.data.id)
                     $('#EditProject').find('.project-title').val(response.data.title)
                     $('#EditProject').find('.project-desc').val(response.data.description)
+
+                    let start_date = new Date(response.data.start_date)
+                    let end_date = new Date(response.data.end_date)
+                    $('#project_edit_start_date').flatpickr({
+                        enableTime: true,
+                        altInput: true,
+                        altFormat: "d M, Y h:i K",
+                        dateFormat: "Y-m-d H:i:s",
+                        defaultDate: start_date,
+                    });
+                    $('#project_edit_end_date').flatpickr({
+                        enableTime: true,
+                        altInput: true,
+                        altFormat: "d M, Y h:i K",
+                        dateFormat: "Y-m-d H:i:s",
+                        defaultDate: end_date,
+                    });
                     $('#EditProject').modal('show');
                 }
             }
@@ -371,9 +508,9 @@ $APP_URL = 'http://localhost/task_Manager';
             success: function (data) {
                 let response = JSON.parse(data);
                 if (response.status == 2000) {
-                    $('#EditProject').modal('hide');
-                    $('#EditProject')[0].reset();
                     GetProjects();
+                    $('#EditProject').modal('hide');
+                    $('#EditForm')[0].reset();
                 }
             }
         });

@@ -34,6 +34,17 @@ if ($result->num_rows > 0) {
     }
 }
 
+$selected_member = '';
+
+if(isset($_GET['member_id'])){
+    $selected_member = $_GET['member_id'];
+}
+$keyword = '';
+
+if(isset($_GET['keyword'])){
+    $keyword = $_GET['keyword'];
+}
+
 $conn->close();
 
 ?>

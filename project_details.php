@@ -10,9 +10,53 @@ $APP_URL = 'http://localhost/task_Manager';
         <?php include 'globals/navbar.php' ?>
     </header>
     <div class="container">
-        <h1>Project name: <?php echo $Project['title'] ?></h1>
-        <p>Project description: <?php echo $Project['description'] ?></p>
-        <p>Member Type: <?php echo $Member['member_type'] == 1 ? 'Creator' : 'Collaborator'; ?></p>
+        <table class="table table-bordered">
+            <tr>
+                <td><strong>Project Name:</strong></td>
+                <td><?php echo $Project['title'] ?></td>
+            </tr>
+            <tr>
+                <td><strong>Project Description:</strong></td>
+                <td><?php echo $Project['description'] ?></td>
+            </tr>
+            <tr>
+                <td><strong>Project Start Date:</strong></td>
+                <td><?php echo date("d M,Y h:iA", strtotime($Project['start_date']))?></td>
+            </tr>
+            <tr>
+                <td><strong>Project End Date:</strong></td>
+                <td><?php echo date("d M,Y h:iA", strtotime($Project['end_date']))?></td>
+            </tr>
+            <tr>
+                <td><strong>Member Type:</strong></td>
+                <td> <?php echo $Member['member_type'] == 1 ? 'Creator' : 'Collaborator'; ?></td>
+            </tr>
+        </table>
+        <form action="">
+            <input type="hidden" name="project_id" value="<?php echo $project_id ?>">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="member_id" class="form-control">
+                        <option value="">All Members</option>
+                        <?php
+                        foreach ($members_list as $member) {
+                            if($member['user_id'] == $selected_member){
+                                echo '<option selected value="' . $member['user_id'] . '">' . $member['name'] . '</option>';
+                            }else{
+                                echo '<option value="' . $member['user_id'] . '">' . $member['name'] . '</option>';
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="keyword" placeholder="Search here" class="form-control" value="<?php echo $keyword ?>">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100">Submit</button>
+                </div>
+            </div>
+        </form>
     </div>
     <div class="container mt-5">
         <div class="row">
@@ -120,6 +164,7 @@ $APP_URL = 'http://localhost/task_Manager';
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="ChangeStatusTask" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -183,6 +228,15 @@ $APP_URL = 'http://localhost/task_Manager';
                     $('#CreateProjects').modal('hide');
                     $('#CreateForm')[0].reset();
                     GetTasks();
+                    setTimeout(function (){
+                        $('#create_due_date').flatpickr({
+                            enableTime: true,
+                            altInput: true,
+                            altFormat: "d M, Y h:i K",
+                            dateFormat: "Y-m-d H:i:s",
+                            defaultDate: new Date(),
+                        });
+                    },300)
                 }
             }
         });
@@ -195,7 +249,9 @@ $APP_URL = 'http://localhost/task_Manager';
             type: "POST",
             headers: {route: 'GET_ALL_TASK'},
             data: {
-                project_id: <?php echo $project_id ?>
+                project_id: '<?php echo $project_id ?>',
+                selected_member: '<?php echo $selected_member ?>',
+                keyword: '<?php echo $keyword ?>',
             },
             success: function (data) {
                 let response = JSON.parse(data);
@@ -210,7 +266,9 @@ $APP_URL = 'http://localhost/task_Manager';
         let html = '';
         if(data.todo.length > 0){
             $.each(data.todo, function (i, v) {
-                let row = `<div class="each-task">
+                let row = ''
+                if(v.has_access == 1){
+                    row = `<div class="each-task">
                             <div class="task-title">` + v.title + `</div>
                             <div class="task-due">` + v.due_date + `</div>
                             <div class="task-assigned">` + v.member_name + `</div>
@@ -223,6 +281,20 @@ $APP_URL = 'http://localhost/task_Manager';
                                 ?>
                             </div>
                         </div>`
+                }else{
+                    row = `<div class="each-task">
+                            <div class="task-title">` + v.title + `</div>
+                            <div class="task-due">` + v.due_date + `</div>
+                            <div class="task-assigned">` + v.member_name + `</div>
+                            <div class="button-group mt-5">
+                                <?php
+                                    if($Member['member_type'] == 1){
+                                        echo '<button onclick="RemoveTaskModal(event, ` + v.id + `)" type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button>';
+                                    }
+                                ?>
+                            </div>
+                        </div>`
+                }
                 html = html + row;
             })
             $('#task-list-wrapper-todo').html(html);

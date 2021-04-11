@@ -23,6 +23,9 @@ if(isset($headers['route']) && $headers['route'] == 'CREATE'){
     $error_count = 0;
     $project_title = $_POST['project_title'];
     $description = $_POST['description'];
+    $start_date = $_POST['project_start_date'];
+    $end_date = $_POST['project_end_date'];
+    $users = $_POST['users'];
 
     if($project_title == ''){
         $error['title'] = "Title field is required";
@@ -38,13 +41,18 @@ if(isset($headers['route']) && $headers['route'] == 'CREATE'){
     }
 
     $date = date("Y/m/d");
-    $sql = "INSERT INTO projects (title, description, created_at) VALUES ('$project_title', '$description', '$date')";
+    $sql = "INSERT INTO projects (title, description, start_date, end_date, created_at) VALUES ('$project_title', '$description', '$start_date', '$end_date', '$date')";
     if ($conn->query($sql) === TRUE) {
         $last_id = $conn->insert_id;
         session_start();
         $user_id = $_SESSION['id'];
         $sql2 = "INSERT INTO projects_members (project_id, member_id, member_type, member_status) VALUES ('$last_id', '$user_id', 1, 1)";
         if ($conn->query($sql2) === TRUE) {
+            foreach ($users as $user){
+                $mem_id = $user;
+                $sql2 = "INSERT INTO projects_members (project_id, member_id, member_type, member_status) VALUES ('$last_id', '$mem_id', 2, 1)";
+                $conn->query($sql2);
+            }
             echo json_encode(array('status' => 2000, 'message' => 'Successfully Created'));
             $conn->close();
             exit();
@@ -69,12 +77,38 @@ if(isset($headers['route']) && $headers['route'] == 'GET_ALL'){
 
     session_start();
     $user_id = $_SESSION['id'];
-    $sql = "Select projects_members.id, projects.id as projects_id, projects.title, projects.description,  projects.created_at from projects_members JOIN projects on projects.id = projects_members.project_id 
+    $sql = "Select projects_members.id, projects.id as projects_id, projects.title, projects.description, projects.start_date, projects.end_date,  projects.created_at from projects_members JOIN projects on projects.id = projects_members.project_id 
             where projects_members.member_id =".$user_id." AND projects_members.member_type = 1";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         // output data of each row
         while($row = $result->fetch_assoc()) {
+            $pro_id = $row['projects_id'];
+            $rowcount = 0;
+            $sql_count = "Select * from projects_tasks where project_id =".$pro_id;
+            if ($res_count=mysqli_query($conn,$sql_count)) {
+                $rowcount=mysqli_num_rows($res_count);
+            }
+            $row['tasks'] = $rowcount;
+
+
+            $rowcount_progress = 0;
+            $sql_count_progress = "Select * from projects_tasks where project_id =".$pro_id." AND status = 2";
+            if ($res_count_progress=mysqli_query($conn,$sql_count_progress)) {
+                $rowcount_progress=mysqli_num_rows($res_count_progress);
+            }
+            $row['tasks_progress'] = $rowcount_progress;
+
+            $rowcount_done = 0;
+            $sql_count_done = "Select * from projects_tasks where project_id =".$pro_id." AND status = 3";
+            if ($res_count_done=mysqli_query($conn,$sql_count_done)) {
+                $rowcount_done=mysqli_num_rows($res_count_done);
+            }
+            $row['tasks_done'] = $rowcount_done;
+
+
+            $row['start_date_formatted'] = date("d M,Y h:iA", strtotime($row['start_date']));
+            $row['end_date_formatted'] = date("d M,Y h:iA", strtotime($row['end_date']));
             $projects[] = $row;
         }
     }
@@ -86,16 +120,56 @@ if(isset($headers['route']) && $headers['route'] == 'GET_ALL_OTHER'){
 
     session_start();
     $user_id = $_SESSION['id'];
-    $sql = "Select projects_members.id, projects.id as projects_id, projects.title, projects.description,  projects.created_at from projects_members JOIN projects on projects.id = projects_members.project_id 
+    $sql = "Select projects_members.id, projects.id as projects_id, projects.title, projects.description, projects.start_date, projects.end_date,  projects.created_at from projects_members JOIN projects on projects.id = projects_members.project_id 
             where projects_members.member_id =".$user_id." AND projects_members.member_type = 2";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         // output data of each row
         while($row = $result->fetch_assoc()) {
+            $pro_id = $row['projects_id'];
+            $rowcount = 0;
+            $sql_count = "Select * from projects_tasks where project_id =".$pro_id;
+            if ($res_count=mysqli_query($conn,$sql_count)) {
+                $rowcount=mysqli_num_rows($res_count);
+            }
+            $row['tasks'] = $rowcount;
+
+            $rowcount_progress = 0;
+            $sql_count_progress = "Select * from projects_tasks where project_id =".$pro_id." AND status = 2";
+            if ($res_count_progress=mysqli_query($conn,$sql_count_progress)) {
+                $rowcount_progress=mysqli_num_rows($res_count_progress);
+            }
+            $row['tasks_progress'] = $rowcount_progress;
+
+            $rowcount_done = 0;
+            $sql_count_done = "Select * from projects_tasks where project_id =".$pro_id." AND status = 3";
+            if ($res_count_done=mysqli_query($conn,$sql_count_done)) {
+                $rowcount_done=mysqli_num_rows($res_count_done);
+            }
+            $row['tasks_done'] = $rowcount_done;
+
+
+            $row['start_date_formatted'] = date("d M,Y h:iA", strtotime($row['start_date']));
+            $row['end_date_formatted'] = date("d M,Y h:iA", strtotime($row['end_date']));
             $projects[] = $row;
         }
     }
     echo json_encode(array('status' => 2000, 'data' => $projects));
+}
+
+if(isset($headers['route']) && $headers['route'] == 'GET_ALL_USERS'){
+    $users = [];
+
+    session_start();
+    $user_id = $_SESSION['id'];
+    $sql = "Select * from users where users.id !=".$user_id;
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+    }
+    echo json_encode(array('status' => 2000, 'data' => $users));
 }
 
 if(isset($headers['route']) && $headers['route'] == 'GET_SINGLE'){
@@ -118,6 +192,8 @@ if(isset($headers['route']) && $headers['route'] == 'UPDATE'){
     $project_title = $_POST['project_title'];
     $description = $_POST['description'];
     $project_id = $_POST['project_id'];
+    $start_date = $_POST['project_start_date'];
+    $end_date = $_POST['project_end_date'];
     if($project_title == ''){
         $error['title'] = "Title field is required";
         $error_count++;
@@ -130,7 +206,7 @@ if(isset($headers['route']) && $headers['route'] == 'UPDATE'){
         echo json_encode(array('status' => 5000, 'error' => $error));
         exit();
     }
-    $sql = "UPDATE projects SET title='".$project_title."', description='".$description."' WHERE id=".$project_id;
+    $sql = "UPDATE projects SET title='".$project_title."', description='".$description."', start_date='".$start_date."', end_date='".$end_date."' WHERE id=".$project_id;
     if ($conn->query($sql) === TRUE) {
         echo json_encode(array('status' => 2000, 'message' => 'Successfully Updated'));
         $conn->close();

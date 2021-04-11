@@ -63,44 +63,133 @@ if(isset($headers['route']) && $headers['route'] == 'CREATE'){
 
 if(isset($headers['route']) && $headers['route'] == 'GET_ALL_TASK'){
     $project_id = $_POST['project_id'];
+    session_start();
+    $user_id = $_SESSION['id'];
 
-    $tasks_todo = [];
-    $tasks_on_progress = [];
-    $tasks_done = [];
-
-    $todo_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.project_id=".$project_id." AND projects_tasks.status = 1";
-    $todo_result = $conn->query($todo_sql);
-    if ($todo_result->num_rows > 0) {
-        // output data of each row
-        while($row = $todo_result->fetch_assoc()) {
-            $tasks_todo[] = $row;
+    if(isset($_POST['selected_member']) && $_POST['selected_member'] != ''){
+        $selected_member = $_POST['selected_member'];
+        $keyword = '';
+        if(isset($_POST['keyword']) && $_POST['keyword'] != ''){
+            $keyword = $_POST['keyword'];
         }
+        $tasks_todo = [];
+        $tasks_on_progress = [];
+        $tasks_done = [];
+
+        $todo_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.assigned_member=".$selected_member." AND projects_tasks.status = 1";
+        $todo_result = $conn->query($todo_sql);
+        if ($todo_result->num_rows > 0) {
+            // output data of each row
+            while($row = $todo_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_todo[] = $row;
+            }
+        }
+
+        $on_progress_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.assigned_member=".$selected_member." AND projects_tasks.status = 2";
+        $on_progress_result = $conn->query($on_progress_sql);
+        if ($on_progress_result->num_rows > 0) {
+            // output data of each row
+            while($row = $on_progress_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_on_progress[] = $row;
+            }
+        }
+
+        $done_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.assigned_member=".$selected_member." AND projects_tasks.status = 3";
+        $done_result = $conn->query($done_sql);
+        if ($done_result->num_rows > 0) {
+            // output data of each row
+            while($row = $done_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_done[] = $row;
+            }
+        }
+
+        $rowcount = 0;
+        $sql_count = "Select * from projects_tasks where project_id =".$project_id;
+        if ($res_count=mysqli_query($conn,$sql_count)) {
+            $rowcount=mysqli_num_rows($res_count);
+        }
+
+        $rv = array(
+            'todo' => $tasks_todo,
+            'on_progress' => $tasks_on_progress,
+            'done' => $tasks_done
+        );
+        echo json_encode(array('status' => 2000, 'data' => $rv, 'total' => $rowcount));
+    }
+    else{
+        $keyword = '';
+        if(isset($_POST['keyword']) && $_POST['keyword'] != ''){
+            $keyword = $_POST['keyword'];
+        }
+        $tasks_todo = [];
+        $tasks_on_progress = [];
+        $tasks_done = [];
+
+        $todo_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.status = 1";
+        $todo_result = $conn->query($todo_sql);
+        if ($todo_result->num_rows > 0) {
+            // output data of each row
+            while($row = $todo_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_todo[] = $row;
+            }
+        }
+
+        $on_progress_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.status = 2";
+        $on_progress_result = $conn->query($on_progress_sql);
+        if ($on_progress_result->num_rows > 0) {
+            // output data of each row
+            while($row = $on_progress_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_on_progress[] = $row;
+            }
+        }
+
+        $done_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.title like '%".$keyword."%' AND projects_tasks.project_id=".$project_id." AND projects_tasks.status = 3";
+        $done_result = $conn->query($done_sql);
+        if ($done_result->num_rows > 0) {
+            // output data of each row
+            while($row = $done_result->fetch_assoc()) {
+                $row['has_access'] = 0;
+                if($user_id == $row['assigned_member']){
+                    $row['has_access'] = 1;
+                }
+                $tasks_done[] = $row;
+            }
+        }
+
+        $rowcount = 0;
+        $sql_count = "Select * from projects_tasks where project_id =".$project_id;
+        if ($res_count=mysqli_query($conn,$sql_count)) {
+            $rowcount=mysqli_num_rows($res_count);
+        }
+
+        $rv = array(
+            'todo' => $tasks_todo,
+            'on_progress' => $tasks_on_progress,
+            'done' => $tasks_done
+        );
+        echo json_encode(array('status' => 2000, 'data' => $rv, 'total' => $rowcount));
     }
 
-    $on_progress_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.project_id=".$project_id." AND projects_tasks.status = 2";
-    $on_progress_result = $conn->query($on_progress_sql);
-    if ($on_progress_result->num_rows > 0) {
-        // output data of each row
-        while($row = $on_progress_result->fetch_assoc()) {
-            $tasks_on_progress[] = $row;
-        }
-    }
-
-    $done_sql = "SELECT projects_tasks.*, users.name as member_name FROM projects_tasks LEFT JOIN users ON users.id = projects_tasks.assigned_member WHERE projects_tasks.project_id=".$project_id." AND projects_tasks.status = 3";
-    $done_result = $conn->query($done_sql);
-    if ($done_result->num_rows > 0) {
-        // output data of each row
-        while($row = $done_result->fetch_assoc()) {
-            $tasks_done[] = $row;
-        }
-    }
-
-    $rv = array(
-        'todo' => $tasks_todo,
-        'on_progress' => $tasks_on_progress,
-        'done' => $tasks_done
-    );
-    echo json_encode(array('status' => 2000, 'data' => $rv));
 }
 
 if(isset($headers['route']) && $headers['route'] == 'DELETE'){
@@ -115,7 +204,6 @@ if(isset($headers['route']) && $headers['route'] == 'DELETE'){
         exit();
     }
 }
-
 
 if(isset($headers['route']) && $headers['route'] == 'CHANGE_STATUS'){
     $project_id = $_POST['project_id'];
